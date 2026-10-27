@@ -16,8 +16,15 @@ aliases so this module needs no API changes. This change builds the module itsel
   combatants, so re-linking and lookups need no module-side database.
 - Initiative remains the place where ordering, validation, and entitlements are decided. The
   module displays and forwards.
-- Out of scope: player-facing views, any Foundry-specific API endpoint, hosting a Foundry
-  instance, support for non-GM users to configure the link.
+- Supported systems at launch (Foundry IDs): `dnd5e`, `pf2e`, `cyphersystem`, `demonlord`,
+  `weirdwizard`, `t2k4e`, `genesys`. Minimum Foundry generation: 14.
+- Multi-user: the GM can place the encounter in an Initiative session and link Foundry users to
+  session members so linked accounts are notified on their turn in Initiative clients. Foundry
+  players keep using Foundry and hold no credentials.
+- Build order: after `initiative-api` and `initiative-desktop`, in either order with `initiative-web`.
+- Out of scope: Initiative-style player views inside Foundry (Foundry's own UI serves players), any
+  Foundry-specific API endpoint, hosting a Foundry instance, support for non-GM users to configure
+  the link, inviting or approving session members from Foundry.
 
 ## Capabilities
 
