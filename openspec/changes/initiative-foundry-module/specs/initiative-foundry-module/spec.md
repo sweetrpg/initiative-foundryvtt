@@ -70,6 +70,14 @@ notify the GM that their change was not applied.
 - **WHEN** a write returns 409
 - **THEN** the Foundry combat reflects the returned state and the GM sees a notice
 
+### Requirement: Supported systems
+The module SHALL provide health mappings at launch for the Foundry systems `dnd5e`, `pf2e`,
+`cyphersystem`, `demonlord`, `weirdwizard`, `t2k4e`, and `genesys`.
+
+#### Scenario: Supported system
+- **WHEN** the world's system is `pf2e`
+- **THEN** mapped health fields sync with the linked Initiative combatants
+
 ### Requirement: Health mapping by system alias
 The module SHALL map Initiative health fields to Foundry actor data paths using a table keyed by
 the API's game-system alias. For a Foundry system with no mapping, it SHALL sync initiative and
@@ -101,8 +109,36 @@ All user-facing strings SHALL come from Foundry language files with English as t
 
 ### Requirement: Packaging
 Releases SHALL publish a manifest and zip suitable for Foundry's package installer, with
-accurate `minimum`, `verified`, and `maximum` compatibility values.
+a `minimum` of Foundry generation 14, `verified` set to the generation last tested, and `maximum`
+left unset until a later generation is checked.
 
 #### Scenario: Install from manifest
 - **WHEN** a GM installs the module from the release manifest URL
 - **THEN** Foundry installs it and lists its declared compatibility
+
+### Requirement: Session link
+When creating or linking an encounter, the GM SHALL be able to choose one of their Initiative
+sessions. An encounter created in a session SHALL be visible to the session's members according to
+their roles, per `initiative-platform`.
+
+#### Scenario: Create in a session
+- **WHEN** the GM creates an encounter from the Foundry combat inside a session
+- **THEN** the encounter's `session_id` is that session and members see it in their clients
+
+### Requirement: Foundry users and Initiative accounts
+The GM SHALL be able to link a Foundry user to a member of the linked session. For a linked user,
+the module SHALL set `controller_user_ids` on combatants for actors that user owns. The module
+SHALL NOT invite, approve, or remove session members, and Foundry players SHALL NOT hold
+Initiative credentials.
+
+#### Scenario: Linked player's turn
+- **WHEN** the turn reaches a combatant whose actor a linked Foundry user owns
+- **THEN** the linked Initiative account receives `turn.yours` in its Initiative clients
+
+#### Scenario: Unlinked Foundry user
+- **WHEN** a Foundry user has no link
+- **THEN** nothing is sent to Initiative on their behalf and Foundry behaves as usual
+
+#### Scenario: Non-member link attempt
+- **WHEN** the GM tries to link a Foundry user to an account that is not a session member
+- **THEN** the module refuses and explains the account must be approved in the session first

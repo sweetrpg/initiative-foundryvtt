@@ -2,8 +2,12 @@
 
 Foundry modules run as JavaScript inside each connected browser. The GM's browser is the only
 client that should talk to Initiative; player browsers must not hold the credential. Foundry's
-current stable generation is 14 (14.369 as of October 2026). Package metadata (`minimum`,
-`verified`, `maximum`) is set in the manifest; check current generations before release.
+current stable generation is 14 (14.369 as of October 2026). The module requires generation 14 as
+its `minimum` and marks 14 `verified`; `maximum` stays unset until a later generation is checked.
+
+Initiative is also multi-user (`initiative-platform`: sessions with GM, co-GM, player, and observer
+roles). Foundry is natively multi-user and its server already relays state to every connected
+player, so this module only needs to connect the GM's world to an Initiative session.
 
 ## Goals / Non-Goals
 
@@ -40,10 +44,24 @@ If this proves too intrusive, a one-way mode (Foundry to Initiative only) is the
 Changes the module applies to Foundry are flagged so its own hooks do not send them back.
 
 **Health mapping lives in the module.** Initiative field keys come from the API's game-system
-definition; Foundry actor data paths differ per Foundry game system (e.g. `dnd5e`). The module
-holds a small mapping table per supported Foundry system, keyed by the system alias the API
-returns. Unmapped systems sync initiative and turn only. This is the one place the module knows
-a game system by name; it is data, not logic about rules.
+definition; Foundry actor data paths differ per Foundry game system. The module holds a small
+mapping table per supported Foundry system, keyed by the alias the API returns. Supported at
+launch (Foundry system ID): `dnd5e`, `pf2e`, `cyphersystem`, `demonlord` (Shadow of the Demon
+Lord), `weirdwizard` (Shadow of the Weird Wizard), `t2k4e` (Twilight 2000 4th Edition), and
+`genesys`. Unmapped systems sync initiative and turn only. This is the one place the module knows a
+game system by name; it is data, not logic about rules.
+
+**Foundry players hold no credentials.** Only the active GM's client connects to Initiative.
+Foundry's own permissions decide what players can change inside Foundry, and the module forwards
+those changes as GM-attributed writes. The approval queue for player health changes exists in the
+platform clients, not in Foundry.
+
+**Session link and account link.** When creating or linking an encounter, the GM can choose an
+Initiative session. The GM may then link each Foundry user to one of that session's members. For a
+linked user, the module sets `controller_user_ids` on the combatants for actors that user owns in
+Foundry, so that account gets `turn.yours` in the Initiative clients. Foundry users with no link
+are unaffected. Linking requires the account to already be a session member; the module never
+invites or approves anyone.
 
 **Linking.** Combatants carry `foundry.actor` and `foundry.combatant` in `external_refs`. The
 module finds existing combatants by reference lookup instead of keeping its own table.
@@ -69,6 +87,9 @@ manifest.
 
 ## Open Questions
 
-- Which Foundry systems get health mappings first (likely `dnd5e`)?
-- Minimum supported Foundry generation (13 or 14 only)?
 - Is one-way mode needed at launch?
+
+## Resolved Questions
+
+- Supported systems at launch: `dnd5e`, `pf2e`, `cyphersystem`, `demonlord`, `weirdwizard`, `t2k4e`, `genesys`.
+- Minimum Foundry generation: 14.
